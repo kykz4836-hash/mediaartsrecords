@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة تسجيل المقررات الدراسية - جامعة مصراتة</title>
+    <!-- مكتبة تحويل الجدول إلى صورة JPG باستخدام html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('vC2gQhiU_400x400.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 450px auto;
+            opacity: 0.05;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 15px;
+            gap: 20px;
+        }
+        .top-nav .logo-img {
+            height: 70px;
+            object-fit: contain;
+        }
+        .top-nav h2 {
+            margin: 0;
+            color: #004080;
+            font-size: 22px;
+            line-height: 1.5;
+            text-align: center;
+            flex: 1;
+            font-weight: 700;
+        }
+        .top-nav h2 span {
+            display: block;
+            font-size: 15px;
+            color: #0066cc;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        .section-view {
+            display: none;
+        }
+        .section-view.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #003366;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #b3d1ff;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: #fdfefe;
+        }
+        input:disabled, select:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-color: #ced4da;
+            cursor: not-allowed;
+        }
+        input:focus, select:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 86, 179, 0.3);
+        }
+        .courses-container {
+            border: 1px solid #b3d1ff;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8fbff;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .courses-grid-layout {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .courses-column {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .section-title-box {
+            background: #004080;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .actions-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        button.action-btn {
+            background-color: #0056b3;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button.action-btn:hover {
+            background-color: #003d82;
+        }
+        button.action-btn:disabled {
+            background-color: #95a5a6 !important;
+            cursor: not-allowed;
+        }
+        .admin-login-side-btn {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            flex: 1;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .admin-login-side-btn:hover {
+            background-color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            direction: rtl;
+        }
+        th, td {
+            border: 1px solid #b3d1ff;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            unicode-bidi: isolate;
+        }
+        th {
+            background-color: #0056b3;
+            color: white;
+        }
+        .student-info {
+            background: #e6f2ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-right: 4px solid #0056b3;
+            color: #003366;
+            line-height: 1.8;
+            direction: rtl;
+            unicode-bidi: isolate;
+        }
+        .full-badge {
+            color: #cc0000;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+            background: #ffe6e6;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .filter-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .admin-action-btn {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .admin-action-btn:hover {
+            background-color: #2c3e50;
+        }
+        .admin-course-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #b3d1ff;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+        .admin-course-row.is-full {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        .admin-course-row:hover {
+            background: #f0f7ff;
+            border-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 380px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .close-modal {
+            float: left;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .close-modal:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-nav" id="topNavContainer">
+        <!-- شعار جامعة مصراتة على اليمين -->
+        <img src="images (1).png" alt="شعار جامعة مصراتة" class="logo-img">
+        
+        <h2 id="mainTitle">
+            جامعة مصراتة
+            <span>كلية الفنون والإعلام - منظومة تسجيل المقررات الدراسية</span>
+        </h2>
+
+        <!-- شعار كلية الفنون والإعلام على اليسار -->
+        <img src="arts.jpg" alt="شعار كلية الفنون والإعلام" class="logo-img">
+    </div>
+
+    <!-- 1. واجهة تسجيل الطالب -->
+    <div id="studentView" class="section-view active">
+        <div id="systemClosedNotice" style="display:none; background:#f8d7da; color:#721c24; padding:15px; border-radius:6px; margin-bottom:20px; text-align:center; font-weight:bold; border:1px solid #f5c6cb;">
+            ⚠️ عذراً، المنظومة مقفلة انتهت فترة تنزيل المقررات
+        </div>
+        <div id="studentEditNotice" style="display:none; background:#d4edda; color:#155724; padding:12px; border-radius:6px; margin-bottom:20px; text-align:center; font-weight:bold; border:1px solid #c3e6cb;">
+            ℹ️ مسموح لك بتعديل المقررات مرة واحدة فقط. قم بالتعديل ثم اضغط على (حفظ التعديلات).
+        </div>
+        <div id="studentDuplicateNotice" style="display:none; background:#fff3cd; color:#856404; padding:12px; border-radius:6px; margin-bottom:20px; text-align:center; font-weight:bold; border:1px solid #ffeeba;">
+            ⚠️ لقد قمت بالتسجيل مسبقاً، لا يُسمح بأكثر من تعديل واحد.
+        </div>
+
+       <!-- نموذج متوافق مع Netlify Forms -->
+       <form id="registrationForm" name="student-submissions" method="POST" data-netlify="true">
+            <input type="hidden" name="form-name" value="student-submissions" />
+            <input type="hidden" id="netifyCoursesDetails" name="courses_details" />
+
+            <div class="form-group">
+                <label for="studentId">رقم القيد:</label>
+                <input type="text" id="studentId" name="student_id" required maxlength="8" pattern="\d{1,8}" placeholder="أدخل رقم القيد (أرقام فقط)" oninput="checkExistingStudent(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label for="studentName">اسم الطالب:</label>
+                <input type="text" id="studentName" name="student_name" required placeholder="أدخل الاسم الثلاثي">
+            </div>
+
+            <div class="form-group">
+                <label for="department">اختر القسم:</label>
+                <select id="department" name="department" required>
+                    <option value="">-- اختر القسم --</option>
+                    <option value="الاعلام">الإعلام</option>
+                    <option value="الاذاعة والتلفزيون">الإذاعة والتلفزيون</option>
+                    <option value="العلاقات العامة">العلاقات العامة</option>
+                    <option value="الصحافة">الصحافة</option>
+                    <option value="التصميم الداخلي">التصميم الداخلي</option>
+                </select>
+            </div>
+
+            <div id="studentDatesInfo" style="display: none; background: #f0f7ff; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b3d1ff; font-size: 13px; color: #003366;">
+                <span id="displayRegDate" style="margin-left: 20px;"></span>
+                <span id="displayEditCount"></span>
+            </div>
+
+            <div class="form-group">
+                <label>المقررات المتاحة والمجموعات الدراسية:</label>
+                <div class="courses-container" id="coursesList">
+                    <p style="color: #555; text-align: center;">الرجاء اختيار القسم أولاً لعرض المقررات</p>
+                </div>
+            </div>
+
+            <div class="actions-group">
+                <button type="button" class="action-btn" id="submitRegBtn" onclick="handleNewRegistration()" style="background-color: #0056b3;">تأكيد التسجيل الجديد</button>
+                <button type="button" class="action-btn" id="submitEditBtn" onclick="handleEditSave()" style="background-color: #d68910; display: none;">حفظ التعديلات</button>
+                <button type="button" class="admin-login-side-btn" onclick="openLoginModal()">دخول مشرف النظام</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. واجهة صفحة جدول الطالب المنفصلة -->
+    <div id="schedulePageView" class="section-view">
+        <div id="jpg-content" style="padding: 20px; background: #fff; width: 100%; box-sizing: border-box; direction: rtl;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="color: #004080; margin: 0 0 5px 0;">جامعة مصراتة</h3>
+                <h4 style="color: #0056b3; margin: 0 0 5px 0;">كلية الفنون والإعلام</h4>
+                <p style="color: #555; margin: 0; font-size: 14px;">الجدول الدراسي للمقررات المسجلة</p>
+            </div>
+            <div class="student-info" id="studentDetails"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المقرر</th>
+                        <th>رمز المقرر</th>
+                        <th>المجموعة</th>
+                        <th>عدد الوحدات</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody"></tbody>
+            </table>
+            <h4 id="totalUnits" style="text-align: left; color: #003366; margin-top: 15px;"></h4>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+            <button id="downloadJpgBtn" class="action-btn" style="background-color: #28a745; flex: 1;">حفظ الجدول كصورة JPG</button>
+            <button id="editScheduleBtn" class="action-btn" style="background-color: #e67e22; flex: 1;" onclick="goToEditViewFromSchedule()">تعديل البيانات</button>
+            <button class="action-btn" style="background-color: #dc3545; flex: 1;" onclick="exitSystem()">خروج من المنظومة</button>
+        </div>
+    </div>
+
+    <!-- 3. واجهة مشرف النظام -->
+    <div id="adminView" class="section-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <h2 style="color: #004080; margin: 0;">لوحة تحكم مشرف النظام</h2>
+            <div style="display: flex; gap: 10px;">
+                <button class="admin-action-btn" style="background-color: #2980b9;" onclick="openChangePasswordModal()">تغيير كلمة المرور</button>
+                <button class="admin-action-btn" style="background-color: #dc3545;" onclick="logoutAdmin()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <!-- قسم ربط Google Sheets -->
+        <div style="background: #e8f8f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a3e4d7;">
+            <h3 style="color: #0e6251; margin-top: 0; font-size: 15px;">🔗 ربط المنظومة بـ Google Sheets:</h3>
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1;">
+                    <label for="googleSheetUrlInput">رابط النشر (Google Apps Script Web App URL):</label>
+                    <input type="text" id="googleSheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/16X6QMFetrqZHaqsO8jidTYkOMVJWJLKaxNyrSxlV9d8/edit?usp=sharing">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button class="admin-action-btn" style="background-color: #16a085; padding: 10px 18px; font-weight: bold;" onclick="saveGoogleSheetUrl()">حفظ رابط الربط</button>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #555; margin-top: 6px; margin-bottom: 0;">* سيتم إرسال بيانات وتفاصيل تسجيل كل طالب تلقائياً إلى قوقل شيت عند تأكيد التسجيل.</p>
+        </div>
+
+        <!-- قسم إدارة فترة التسجيل -->
+        <div style="background: #eaf2f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d1ff;">
+            <h3 style="color: #003366; margin-top: 0; font-size: 15px;">تحديد تاريخ فتح وإيقاف التسجيل:</h3>
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1;">
+                    <label for="regStartDate">من تاريخ:</label>
+                    <input type="date" id="regStartDate">
+                </div>
+                <div style="flex: 1;">
+                    <label for="regEndDate">إلى تاريخ (تاريخ الإيقاف):</label>
+                    <input type="date" id="regEndDate">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button class="admin-action-btn" style="background-color: #2980b9; padding: 10px 18px; font-weight: bold;" onclick="saveRegPeriod()">حفظ فترة التسجيل</button>
+                </div>
+            </div>
+            <p id="regStatusText" style="font-size: 12px; color: #555; margin-top: 6px; margin-bottom: 0;"></p>
+        </div>
+        
+        <div style="background: #e6f2ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d1ff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="color: #003366; margin: 0; font-size: 16px;">إدارة المقررات وإضافتها حسب القسم:</h3>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button class="admin-action-btn" style="background-color: #27ae60; font-weight: bold;" onclick="openAddCourseModal()">+ إضافة مقرر جديد للقسم</button>
+                    <div style="width: 220px;">
+                        <select id="adminSelectDept" onchange="loadAdminCoursesForDept()">
+                            <option value="">-- اختر القسم --</option>
+                            <option value="الاعلام">الإعلام</option>
+                            <option value="الاذاعة والتلفزيون">الإذاعة والتلفزيون</option>
+                            <option value="العلاقات العامة">العلاقات العامة</option>
+                            <option value="الصحافة">الصحافة</option>
+                            <option value="التصميم الداخلي">التصميم الداخلي</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <p style="font-size: 13px; color: #555; margin-top: 5px;">* انقر على أي مقرر في القائمة أدناه لتعديله أو تعديل سعته أو فتح مجموعة جديدة أو حذفه:</p>
+            
+            <div id="adminCoursesListContainer" style="max-height: 220px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #b3d1ff;">
+                <p style="color: #777; text-align: center; margin: 15px 0;">الرجاء اختيار القسم أعلاه لعرض المقررات وإدارتها</p>
+            </div>
+        </div>
+
+        <div class="filter-box">
+            <div style="flex: 1; max-width: 300px;">
+                <label for="filterDept">تصفية جدول الطلاب حسب القسم:</label>
+                <select id="filterDept" onchange="filterStudents()">
+                    <option value="">جميع الأقسام</option>
+                    <option value="الاعلام">الإعلام</option>
+                    <option value="الاذاعة والتلفزيون">الإذاعة والتلفزيون</option>
+                    <option value="العلاقات العامة">العلاقات العامة</option>
+                    <option value="الصحافة">الصحافة</option>
+                    <option value="التصميم الداخلي">التصميم الداخلي</option>
+                </select>
+            </div>
+            <div>
+                <button class="admin-action-btn" style="background-color: #dc3545; padding: 10px 15px; font-weight: bold;" onclick="clearAllData()">مسح بيانات الطلبة</button>
+            </div>
+        </div>
+
+        <div id="adminTableContainer" style="background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #b3d1ff; overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم القيد</th>
+                        <th>اسم الطالب</th>
+                        <th>القسم</th>
+                        <th>المقررات المسجلة</th>
+                        <th>رمز المقرر</th>
+                        <th>المجموعة</th>
+                        <th>الوحدات</th>
+                        <th>إجمالي الوحدات</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <tr>
+                        <td colspan="8" style="color: #777;">لا يوجد طلاب مسجلين حتى الآن</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- زر حفظ كشوفات الطلاب كملف Word منسق -->
+        <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+            <button class="action-btn" style="background-color: #2b579a; flex: 1;" onclick="downloadAdminWord()">حفظ الكشوفات كملف Word منسق</button>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تسجيل الدخول -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+        <h3 style="color: #004080; margin-top: 0;">تسجيل دخول مشرف النظام</h3>
+        <p style="font-size: 13px; color: #555;">أدخل كلمة المرور الخاصة بصلاحيات الإشراف:</p>
+        <input type="password" id="adminPassword" placeholder="كلمة المرور" style="margin-bottom: 15px;">
+        <button class="action-btn" onclick="verifyAdminPassword()" style="width: 100%;">دخول</button>
+    </div>
+</div>
+
+<!-- نافذة تغيير كلمة المرور لمشرف النظام -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content" style="width: 400px; text-align: right;">
+        <span class="close-modal" onclick="closeChangePasswordModal()" style="float: left;">&times;</span>
+        <h3 style="color: #004080; margin-top: 0; text-align: center;">تغيير كلمة المرور للإشراف</h3>
+        
+        <div class="form-group">
+            <label for="currentPassInput">كلمة المرور الحالية:</label>
+            <input type="password" id="currentPassInput" placeholder="أدخل كلمة المرور الحالية">
+        </div>
+
+        <div class="form-group">
+            <label for="newPassInput">كلمة المرور الجديدة:</label>
+            <input type="password" id="newPassInput" placeholder="أدخل كلمة المرور الجديدة">
+        </div>
+
+        <button class="action-btn" onclick="confirmChangePassword()" style="width: 100%;">حفظ كلمة المرور الجديدة</button>
+    </div>
+</div>
+
+<!-- نافذة تعديل سعة المجموعات -->
+<div id="capacityModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close-modal" onclick="closeCapacityModal()">&times;</span>
+        <h3 style="color: #004080; margin-top: 0;">تعديل السعة القصوى للمجموعة</h3>
+        <p id="selectedCourseCapacityInfo" style="font-size: 13px; color: #555; text-align: right;"></p>
+        <div class="form-group" style="text-align: right;">
+            <label for="editCapacityInput">الحد الأقصى الجديد للطلاب:</label>
+            <input type="number" id="editCapacityInput" min="1" max="200">
+        </div>
+        <button class="action-btn" onclick="confirmUpdateCapacity()" style="width: 100%;">حفظ التعديل</button>
+    </div>
+</div>
+
+<!-- نافذة فتح مجموعة جديدة -->
+<div id="newGroupModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close-modal" onclick="closeNewGroupModal()">&times;</span>
+        <h3 style="color: #004080; margin-top: 0;">فتح مجموعة جديدة للمقرر</h3>
+        <p id="selectedCourseInfoModal" style="font-size: 13px; color: #555; text-align: right;"></p>
+        <div class="form-group" style="text-align: right;">
+            <label for="newGroupCapacity">الحد الأقصى للطلاب للمجموعة الجديدة:</label>
+            <input type="number" id="newGroupCapacity" value="20" min="1" max="100">
+        </div>
+        <button class="action-btn" onclick="confirmOpenNewGroup()" style="width: 100%;">تأكيد فتح المجموعة الجديدة</button>
+    </div>
+</div>
+
+<!-- نافذة إضافة مقرر جديد للقسم -->
+<div id="addCourseModal" class="modal">
+    <div class="modal-content" style="width: 420px; text-align: right;">
+        <span class="close-modal" onclick="closeAddCourseModal()" style="float: left;">&times;</span>
+        <h3 style="color: #004080; margin-top: 0; text-align: center;">إضافة مقرر جديد</h3>
+        
+        <div class="form-group">
+            <label for="newCourseDept">اختر القسم:</label>
+            <select id="newCourseDept">
+                <option value="الاعلام">الإعلام</option>
+                <option value="الاذاعة والتلفزيون">الإذاعة والتلفزيون</option>
+                <option value="العلاقات العامة">العلاقات العامة</option>
+                <option value="الصحافة">الصحافة</option>
+                <option value="التصميم الداخلي">التصميم الداخلي</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="newCourseType">نوع المقرر:</label>
+            <select id="newCourseType">
+                <option value="dept">مقررات التخصص</option>
+                <option value="common">المواد العامة</option>
+                <option value="shared">المواد المشتركة</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="newCourseName">اسم المقرر:</label>
+            <input type="text" id="newCourseName" placeholder="مثال: التصوير الرقمي">
+        </div>
+
+        <div class="form-group">
+            <label for="newCourseCode">رمز المقرر:</label>
+            <input type="text" id="newCourseCode" placeholder="مثال: MC104">
+        </div>
+
+        <div class="form-group">
+            <label for="newCourseUnits">عدد الوحدات الدراسية:</label>
+            <input type="number" id="newCourseUnits" value="3" min="1" max="6">
+        </div>
+
+        <div class="form-group">
+            <label for="newCourseMax">الحد الأقصى للطلاب (السعة):</label>
+            <input type="number" id="newCourseMax" value="20" min="1" max="100">
+        </div>
+
+        <button class="action-btn" onclick="confirmAddCourse()" style="width: 100%;">حفظ وإضافة المقرر</button>
+    </div>
+</div>
+
+<!-- نافذة تعديل بيانات المقرر -->
+<div id="editCourseModal" class="modal">
+    <div class="modal-content" style="width: 420px; text-align: right;">
+        <span class="close-modal" onclick="closeEditCourseModal()" style="float: left;">&times;</span>
+        <h3 style="color: #004080; margin-top: 0; text-align: center;">تعديل بيانات المقرر</h3>
+
+        <div class="form-group">
+            <label for="editCourseName">اسم المقرر:</label>
+            <input type="text" id="editCourseName">
+        </div>
+
+        <div class="form-group">
+            <label for="editCourseCode">رمز المقرر:</label>
+            <input type="text" id="editCourseCode">
+        </div>
+
+        <div class="form-group">
+            <label for="editCourseUnits">عدد الوحدات الدراسية:</label>
+            <input type="number" id="editCourseUnits" min="1" max="6">
+        </div>
+
+        <button class="action-btn" onclick="confirmEditCourse()" style="width: 100%;">حفظ التعديلات</button>
+    </div>
+</div>
+
+<script>
+    // المواد العامة المشتركة للأقسام
+    const defaultCommonCourses = [
+        { code: "MU101", name: "اللغة العربية 1", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "MU102", name: "اللغة العربية 2", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "MU103", name: "الثقافة الاسلامية", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "MU104", name: "اللغة الانجليزية 1", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "MU105", name: "اللغة الانجليزية 2", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "MU106", name: "مبادئ الحاسوب", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+        { code: "ST301", name: "الاحصاء الوصفي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+    ];
+
+    // المواد المشتركة
+    const defaultSharedCourses = [
+         { code: "RT201", name: "فن الالقاء", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "RT301", name: "الدعاية والاقناع", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR207", name: "الرأي العام", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR304", name: "الاعلام والتنمية", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "RT209", name: "مقدمة في السينما والمسرح", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO103", name: "التصوير الضوئي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR202", name: "أساسيات ومناهج البحث", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR203", name: "النظم السياسية المعاصرة", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR204", name: "مهارات الاتصال", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "PR201", name: "علم النفس الإعلامي", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO206", name: "علم الاجتماع الاعلامي", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO205", name: "نظريات الاتصال", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "DJ408", name: "التوثيق والنشر الالكتروني", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO410", name: "الاعلام الدولي", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO412", name: "اخلاقيات وتشريعات الاعلام", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 }, 
+         { code: "RT302", name: "تقنيات الاتصال", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "RT309", name: "قضايا إعلامية معاصرة", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "JO307", name: "الترجمة الإعلامية", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+         { code: "RT204", name: "المصطلحات الإعلامية", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+    ];
+
+    const defaultDepartmentCourses = {
+        "الاعلام": [
+            { code: "PR101", name: "مدخل الى العلاقات العامة", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "RT101", name: "مقدمة في الاتصال", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "RT102", name: "مدخل الى الاذاعة والتلفزيون", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "JO101", name: "التحرير الاعلامي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "JO102", name: "الاعلام الليبي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "JO104", name: "مدخل الى الصحافة والنشر الالكتروني", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+        ],
+        "الاذاعة والتلفزيون": [
+            { code: "BR201", name: "فن الإلقاء الصوتي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "BR202", name: "مونتاج الفيديو الرقمي", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "BR203", name: "إخراج البرامج التلفزيونية", units: 4, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+        ],
+        "العلاقات العامة": [
+            { code: "PR301", name: "أسس العلاقات العامة", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "PR302", name: "إدارة الأزمات الاعلامية", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "PR303", name: "التسويق الرقمي", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+        ],
+        "الصحافة": [
+            { code: "JN401", name: "فن الكتابة الصحفية", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "JN402", name: "الصحافة الاستقصائية", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "JN403", name: "تصميم الصحف والمجلات", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+        ],
+        "التصميم الداخلي": [
+            { code: "ID501", name: "أساسيات التصميم الداخلي", units: 4, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "ID502", name: "رسم هندسي وتخطيط", units: 3, group: "المجموعة الأولى", max: 20, enrolled: 0 },
+            { code: "ID503", name: "تاريخ الفنون والعمارة", units: 2, group: "المجموعة الأولى", max: 20, enrolled: 0 }
+        ]
+    };
+
+    let departmentCourses = JSON.parse(localStorage.getItem("departmentCourses")) || defaultDepartmentCourses;
+    let storedCommon = JSON.parse(localStorage.getItem("commonCourses"));
+    let commonCourses = (storedCommon && storedCommon.length > 0) ? storedCommon : defaultCommonCourses;
+    
+    let storedShared = JSON.parse(localStorage.getItem("sharedCourses"));
+    let sharedCourses = (storedShared && storedShared.length > 0) ? storedShared : defaultSharedCourses;
+
+    let registeredStudents = JSON.parse(localStorage.getItem("registeredStudents")) || [];
+    let regPeriod = JSON.parse(localStorage.getItem("regPeriod")) || { startDate: "", endDate: "" };
+    let adminPassword = localStorage.getItem("adminPassword") || "admin123";
+    let googleSheetUrl = localStorage.getItem("googleSheetUrl") || "";
+    
+    let currentEditingStudentId = null;
+
+    function openLoginModal() {
+        document.getElementById("loginModal").style.display = "flex";
+    }
+
+    function closeLoginModal() {
+        document.getElementById("loginModal").style.display = "none";
+        document.getElementById("adminPassword").value = "";
+    }
+
+    function verifyAdminPassword() {
+        const pass = document.getElementById("adminPassword").value;
+        if (pass === adminPassword) {
+            closeLoginModal();
+            showAdminView();
+        } else {
+            alert("كلمة المرور غير صحيحة!");
+        }
+    }
+
+    function openChangePasswordModal() {
+        document.getElementById("changePasswordModal").style.display = "flex";
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById("changePasswordModal").style.display = "none";
+        document.getElementById("currentPassInput").value = "";
+        document.getElementById("newPassInput").value = "";
+    }
+
+    function confirmChangePassword() {
+        const currentPass = document.getElementById("currentPassInput").value;
+        const newPass = document.getElementById("newPassInput").value;
+
+        if (currentPass !== adminPassword) {
+            alert("كلمة المرور الحالية غير صحيحة!");
+            return;
+        }
+
+        if (!newPass || newPass.length < 4) {
+            alert("الرجاء إدخال كلمة مرور جديدة تتكون من 4 خانات على الأقل.");
+            return;
+        }
+
+        adminPassword = newPass;
+        localStorage.setItem("adminPassword", adminPassword);
+        closeChangePasswordModal();
+        alert("تم تغيير كلمة المرور بنجاح.");
+    }
+
+    function saveGoogleSheetUrl() {
+        const url = document.getElementById("googleSheetUrlInput").value.trim();
+        googleSheetUrl = url;
+        localStorage.setItem("googleSheetUrl", googleSheetUrl);
+        alert("تم حفظ رابط قوقل شيت بنجاح.");
+    }
+
+    // دالة إرسال البيانات إلى قوقل شيت (Google Apps Script Web App)
+    function sendDataToGoogleSheet(studentData) {
+        if (!googleSheetUrl) return;
+
+        const payload = {
+            studentId: studentData.studentId,
+            studentName: studentData.studentName,
+            department: studentData.department,
+            totalUnits: studentData.totalUnits,
+            regDate: studentData.regDate,
+            courses: studentData.courses.map(c => `${c.name} (${c.code}) - ${c.group} - ${c.units} وحدات`).join(" | ")
+        };
+
+        fetch(googleSheetUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            console.log("تم إرسال البيانات إلى قوقل شيت بنجاح");
+        }).catch(err => {
+            console.error("خطأ في إرسال البيانات إلى قوقل شيت:", err);
+        });
+    }
+
+    function showAdminView() {
+        document.getElementById("studentView").classList.remove("active");
+        document.getElementById("schedulePageView").classList.remove("active");
+        document.getElementById("adminView").classList.add("active");
+        document.getElementById("mainTitle").innerHTML = "جامعة مصراتة <span style='color:#0066cc;'>كلية الفنون والإعلام - لوحة تحكم مشرف النظام</span>";
+        
+        if(regPeriod.startDate) document.getElementById("regStartDate").value = regPeriod.startDate;
+        if(regPeriod.endDate) document.getElementById("regEndDate").value = regPeriod.endDate;
+        if(googleSheetUrl) document.getElementById("googleSheetUrlInput").value = googleSheetUrl;
+        updateRegStatusText();
+
+        renderAdminStudentsTable();
+    }
+
+    function logoutAdmin() {
+        document.getElementById("adminView").classList.remove("active");
+        document.getElementById("studentView").classList.add("active");
+        document.getElementById("mainTitle").innerHTML = "جامعة مصراتة <span style='color:#0066cc;'>كلية الفنون والإعلام - منظومة تسجيل المقررات الدراسية</span>";
+    }
+
+    function saveRegPeriod() {
+        const start = document.getElementById("regStartDate").value;
+        const end = document.getElementById("regEndDate").value;
+        regPeriod = { startDate: start, endDate: end };
+        localStorage.setItem("regPeriod", JSON.stringify(regPeriod));
+        updateRegStatusText();
+        alert("تم حفظ فترة التسجيل بنجاح.");
+        checkSystemAvailability();
+    }
+
+    function updateRegStatusText() {
+        const textEl = document.getElementById("regStatusText");
+        if(regPeriod.startDate && regPeriod.endDate) {
+            textEl.innerHTML = `تاريخ إيقاف التسجيل محدد حتى تاريخ: ${regPeriod.endDate}`;
+        } else {
+            textEl.innerHTML = "لم يتم تحديد تاريخ إيقاف التسجيل (التسجيل مفتوح افتراضياً).";
+        }
+    }
+
+    function checkSystemAvailability() {
+        const today = new Date().toISOString().split('T')[0];
+        let isClosedByAdmin = false;
+        
+        if(regPeriod.startDate && regPeriod.endDate) {
+            if(today < regPeriod.startDate || today > regPeriod.endDate) {
+                isClosedByAdmin = true;
+            }
+        }
+
+        const noticeBox = document.getElementById("systemClosedNotice");
+        const submitRegBtn = document.getElementById("submitRegBtn");
+        const studentNameInput = document.getElementById("studentName");
+        const departmentSelect = document.getElementById("department");
+
+        if(isClosedByAdmin) {
+            noticeBox.style.display = "block";
+            noticeBox.innerHTML = "⚠️ عذراً، المنظومة مقفلة انتهت فترة تنزيل المقررات";
+            
+            submitRegBtn.disabled = true;
+            studentNameInput.disabled = true;
+            departmentSelect.disabled = true;
+            document.getElementById("studentId").disabled = true;
+        } else {
+            noticeBox.style.display = "none";
+            submitRegBtn.disabled = false;
+            studentNameInput.disabled = false;
+            departmentSelect.disabled = false;
+            document.getElementById("studentId").disabled = false;
+        }
+    }
+
+    function checkExistingStudent(studentId) {
+        const duplicateNoticeEl = document.getElementById("studentDuplicateNotice");
+        const editNoticeEl = document.getElementById("studentEditNotice");
+        const submitRegBtn = document.getElementById("submitRegBtn");
+        const datesInfoEl = document.getElementById("studentDatesInfo");
+        const studentNameInput = document.getElementById("studentName");
+        const departmentSelect = document.getElementById("department");
+
+        if (!studentId || studentId.trim() === "") {
+            duplicateNoticeEl.style.display = "none";
+            studentNameInput.value = "";
+            departmentSelect.value = "";
+            studentNameInput.disabled = false;
+            departmentSelect.disabled = false;
+            submitRegBtn.style.display = "inline-block";
+            document.getElementById("coursesList").innerHTML = '<p style="color: #555; text-align: center;">الرجاء اختيار القسم أولاً لعرض المقررات</p>';
+            return;
+        }
+        
+        const existing = registeredStudents.find(s => s.studentId === studentId);
+
+        if (existing) {
+            duplicateNoticeEl.style.display = "block";
+            duplicateNoticeEl.innerHTML = "⚠️ هذا رقم القيد مسجل مسبقا ارجو التأكد من رقم القيد";
+            editNoticeEl.style.display = "none";
+            datesInfoEl.style.display = "none";
+            
+            studentNameInput.value = existing.studentName;
+            departmentSelect.value = existing.department;
+            studentNameInput.disabled = true;
+            departmentSelect.disabled = true;
+            
+            submitRegBtn.style.display = "none";
+            document.getElementById("coursesList").innerHTML = '<p style="color: #856404; text-align: center; font-weight: bold;">⚠️ هذا رقم القيد مسجل مسبقا ارجو التأكد من رقم القيد.</p>';
+        } else {
+            duplicateNoticeEl.style.display = "none";
+            editNoticeEl.style.display = "none";
+            datesInfoEl.style.display = "none";
+            
+            studentNameInput.value = "";
+            departmentSelect.value = "";
+            studentNameInput.disabled = false;
+            departmentSelect.disabled = false;
+            submitRegBtn.style.display = "inline-block";
+            
+            document.getElementById("coursesList").innerHTML = '<p style="color: #555; text-align: center;">الرجاء اختيار القسم أولاً لعرض المقررات</p>';
+        }
+    }
+
+    document.getElementById("department").addEventListener("change", function() {
+        const dept = this.value;
+        const container = document.getElementById("coursesList");
+        container.innerHTML = "";
+
+        if(!dept || !departmentCourses[dept]) {
+            container.innerHTML = '<p style="color: #555; text-align: center;">الرجاء اختيار القسم أولاً لعرض المقررات</p>';
+            return;
+        }
+
+        const gridLayout = document.createElement("div");
+        gridLayout.className = "courses-grid-layout";
+
+        // 1. عمود مقررات التخصص
+        const deptColumn = document.createElement("div");
+        deptColumn.className = "courses-column";
+
+        const deptTitleBox = document.createElement("div");
+        deptTitleBox.className = "section-title-box";
+        deptTitleBox.innerText = `مقررات التخصص (${dept})`;
+        deptColumn.appendChild(deptTitleBox);
+
+        const deptCourses = departmentCourses[dept];
+        const groupedDeptByCode = {};
+        deptCourses.forEach((course, index) => {
+            if (!groupedDeptByCode[course.code]) {
+                groupedDeptByCode[course.code] = {
+                    name: course.name,
+                    code: course.code,
+                    units: course.units,
+                    groups: []
+                };
+            }
+            groupedDeptByCode[course.code].groups.push({ ...course, originalIndex: index, isType: "dept" });
+        });
+
+        Object.values(groupedDeptByCode).forEach(item => {
+            const courseBlock = document.createElement("div");
+            courseBlock.style.cssText = "background: #ffffff; border: 1px solid #b3d1ff; border-radius: 6px; padding: 10px;";
+            
+            let groupsHtml = `<div style="font-weight: bold; color: #004080; margin-bottom: 6px; border-bottom: 1px solid #e1edff; padding-bottom: 4px;">
+                <span>${item.name} <span style="color:#666; font-size:13px; direction: ltr; display: inline-block;">(${item.code})</span> - ${item.units} وحدات</span>
+            </div><div style="display: flex; flex-direction: column; gap: 5px;">`;
+
+            item.groups.forEach(g => {
+                const isFull = g.enrolled >= g.max;
+                groupsHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: ${isFull ? '#fff8f8' : '#f8fbff'}; border: 1px solid ${isFull ? '#dc3545' : '#d0e3ff'}; border-radius: 4px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="dept_course_${g.originalIndex}" data-type="dept" value="${g.originalIndex}" ${isFull ? 'disabled' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+                            <label for="dept_course_${g.originalIndex}" style="margin: 0; cursor: pointer; color: ${isFull ? '#999' : '#003366'}; font-weight: normal;">
+                                <strong>${g.group}</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #555; background: #e6f2ff; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">مقاعد: ${g.enrolled}/${g.max}</span>
+                            ${isFull ? '<span class="full-badge">مكتمل</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            groupsHtml += `</div>`;
+            courseBlock.innerHTML = groupsHtml;
+            deptColumn.appendChild(courseBlock);
+        });
+
+        gridLayout.appendChild(deptColumn);
+
+        // 2. عمود المواد العامة
+        const commonColumn = document.createElement("div");
+        commonColumn.className = "courses-column";
+
+        const commonTitleBox = document.createElement("div");
+        commonTitleBox.className = "section-title-box";
+        commonTitleBox.style.backgroundColor = "#2c3e50";
+        commonTitleBox.innerText = "المواد العامة";
+        commonColumn.appendChild(commonTitleBox);
+
+        const groupedCommonByCode = {};
+        commonCourses.forEach((course, index) => {
+            if (!groupedCommonByCode[course.code]) {
+                groupedCommonByCode[course.code] = {
+                    name: course.name,
+                    code: course.code,
+                    units: course.units,
+                    groups: []
+                };
+            }
+            groupedCommonByCode[course.code].groups.push({ ...course, originalIndex: index, isType: "common" });
+        });
+
+        Object.values(groupedCommonByCode).forEach(item => {
+            const courseBlock = document.createElement("div");
+            courseBlock.style.cssText = "background: #ffffff; border: 1px solid #b3d1ff; border-radius: 6px; padding: 10px;";
+            
+            let groupsHtml = `<div style="font-weight: bold; color: #2c3e50; margin-bottom: 6px; border-bottom: 1px solid #e1edff; padding-bottom: 4px;">
+                <span>${item.name} <span style="color:#666; font-size:13px; direction: ltr; display: inline-block;">(${item.code})</span> - ${item.units} وحدات</span>
+            </div><div style="display: flex; flex-direction: column; gap: 5px;">`;
+
+            item.groups.forEach(g => {
+                const isFull = g.enrolled >= g.max;
+                groupsHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: ${isFull ? '#fff8f8' : '#f8fbff'}; border: 1px solid ${isFull ? '#dc3545' : '#d0e3ff'}; border-radius: 4px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="common_course_${g.originalIndex}" data-type="common" value="${g.originalIndex}" ${isFull ? 'disabled' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+                            <label for="common_course_${g.originalIndex}" style="margin: 0; cursor: pointer; color: ${isFull ? '#999' : '#003366'}; font-weight: normal;">
+                                <strong>${g.group}</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #555; background: #e6f2ff; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">مقاعد: ${g.enrolled}/${g.max}</span>
+                            ${isFull ? '<span class="full-badge">مكتمل</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            groupsHtml += `</div>`;
+            courseBlock.innerHTML = groupsHtml;
+            commonColumn.appendChild(courseBlock);
+        });
+
+        gridLayout.appendChild(commonColumn);
+
+        // 3. عمود المواد المشتركة
+        if (dept !== "التصميم الداخلي") {
+            const sharedColumn = document.createElement("div");
+            sharedColumn.className = "courses-column";
+
+            const sharedTitleBox = document.createElement("div");
+            sharedTitleBox.className = "section-title-box";
+            sharedTitleBox.style.backgroundColor = "#16a085";
+            sharedTitleBox.innerText = "المواد المشتركة";
+            sharedColumn.appendChild(sharedTitleBox);
+
+            const groupedSharedByCode = {};
+            sharedCourses.forEach((course, index) => {
+                if (!groupedSharedByCode[course.code]) {
+                    groupedSharedByCode[course.code] = {
+                        name: course.name,
+                        code: course.code,
+                        units: course.units,
+                        groups: []
+                    };
+                }
+                groupedSharedByCode[course.code].groups.push({ ...course, originalIndex: index, isType: "shared" });
+            });
+
+            Object.values(groupedSharedByCode).forEach(item => {
+                const courseBlock = document.createElement("div");
+                courseBlock.style.cssText = "background: #ffffff; border: 1px solid #b3d1ff; border-radius: 6px; padding: 10px;";
+                
+                let groupsHtml = `<div style="font-weight: bold; color: #16a085; margin-bottom: 6px; border-bottom: 1px solid #e1edff; padding-bottom: 4px;">
+                    <span>${item.name} <span style="color:#666; font-size:13px; direction: ltr; display: inline-block;">(${item.code})</span> - ${item.units} وحدات</span>
+                </div><div style="display: flex; flex-direction: column; gap: 5px;">`;
+
+                item.groups.forEach(g => {
+                    const isFull = g.enrolled >= g.max;
+                    groupsHtml += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: ${isFull ? '#fff8f8' : '#f8fbff'}; border: 1px solid ${isFull ? '#dc3545' : '#d0e3ff'}; border-radius: 4px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="shared_course_${g.originalIndex}" data-type="shared" value="${g.originalIndex}" ${isFull ? 'disabled' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="shared_course_${g.originalIndex}" style="margin: 0; cursor: pointer; color: ${isFull ? '#999' : '#003366'}; font-weight: normal;">
+                                    <strong>${g.group}</strong>
+                                </label>
+                            </div>
+                            <div>
+                                <span style="font-size: 11px; color: #555; background: #e6f2ff; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">مقاعد: ${g.enrolled}/${g.max}</span>
+                                ${isFull ? '<span class="full-badge">مكتمل</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                groupsHtml += `</div>`;
+                courseBlock.innerHTML = groupsHtml;
+                sharedColumn.appendChild(courseBlock);
+            });
+
+            gridLayout.appendChild(sharedColumn);
+        }
+
+        container.appendChild(gridLayout);
+    });
+
+    function handleNewRegistration() {
+        const today = new Date().toISOString().split('T')[0];
+        if(regPeriod.startDate && regPeriod.endDate) {
+            if(today < regPeriod.startDate || today > regPeriod.endDate) {
+                alert("⚠️ عذراً، المنظومة مقفلة انتهت فترة تنزيل المقررات.");
+                return;
+            }
+        }
+
+        const studentId = document.getElementById("studentId").value.trim();
+        const studentName = document.getElementById("studentName").value.trim();
+        const department = document.getElementById("department").value;
+
+        if(!studentId || !studentName || !department) {
+            alert("الرجاء إكمال كافة البيانات الأساسية.");
+            return;
+        }
+
+        if(registeredStudents.some(s => s.studentId === studentId)) {
+            alert("⚠️ هذا رقم القيد مسجل مسبقا ارجو التأكد من رقم القيد");
+            return;
+        }
+
+        const checkboxes = document.querySelectorAll("#coursesList input[type='checkbox']:checked");
+        if(checkboxes.length === 0) {
+            alert("الرجاء اختيار مقرر واحد على الأقل.");
+            return;
+        }
+
+        const selectedCourses = [];
+        let totalUnits = 0;
+
+        checkboxes.forEach(cb => {
+            const type = cb.getAttribute("data-type");
+            const idx = cb.value;
+            
+            if (type === "dept") {
+                const course = departmentCourses[department][idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "dept",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            } else if (type === "common") {
+                const course = commonCourses[idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "common",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            } else if (type === "shared") {
+                const course = sharedCourses[idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "shared",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            }
+        });
+
+        let detailsText = selectedCourses.map(c => `${c.name} (${c.code}) - ${c.group} - ${c.units} وحدات`).join(" | ");
+        detailsText += ` [إجمالي الوحدات: ${totalUnits}]`;
+        document.getElementById("netifyCoursesDetails").value = detailsText;
+
+        for(let sc of selectedCourses) {
+            if (sc.type === "dept") {
+                const courseObj = departmentCourses[department][sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التسجيل!`);
+                    return;
+                }
+            } else if (sc.type === "common") {
+                const courseObj = commonCourses[sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر العام ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التسجيل!`);
+                    return;
+                }
+            } else if (sc.type === "shared") {
+                const courseObj = sharedCourses[sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر المشترك ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التسجيل!`);
+                    return;
+                }
+            }
+        }
+
+        selectedCourses.forEach(sc => {
+            if (sc.type === "dept") {
+                departmentCourses[department][sc.indexInArray].enrolled++;
+            } else if (sc.type === "common") {
+                commonCourses[sc.indexInArray].enrolled++;
+            } else if (sc.type === "shared") {
+                sharedCourses[sc.indexInArray].enrolled++;
+            }
+        });
+
+        const currentDateStr = new Date().toLocaleDateString();
+        const studentData = {
+            studentId,
+            studentName,
+            department,
+            courses: selectedCourses,
+            totalUnits,
+            regDate: currentDateStr,
+            editCount: 0
+        };
+
+        registeredStudents.push(studentData);
+        saveDataToStorage();
+
+        // إرسال البيانات تلقائياً إلى قوقل شيت المربوط
+        sendDataToGoogleSheet(studentData);
+
+        const myForm = document.getElementById('registrationForm');
+        const formData = new FormData(myForm);
+        fetch("/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(formData).toString()
+        }).catch((error) => console.log("Netlify Form Submission Info:", error));
+
+        displayStudentSchedule(studentData);
+    }
+
+    function handleEditSave() {
+        const studentId = document.getElementById("studentId").value.trim();
+        const existingStudentIndex = registeredStudents.findIndex(s => s.studentId === studentId);
+        
+        if(existingStudentIndex !== -1 && registeredStudents[existingStudentIndex].editCount >= 1) {
+            alert("⚠️ لا يُسمح لك بالتعديل أكثر من مرة واحدة.");
+            return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        if(regPeriod.startDate && regPeriod.endDate) {
+            if(today < regPeriod.startDate || today > regPeriod.endDate) {
+                alert("⚠️ عذراً، المنظومة مقفلة انتهت فترة تنزيل المقررات.");
+                return;
+            }
+        }
+
+        const studentName = document.getElementById("studentName").value.trim();
+        const department = document.getElementById("department").value;
+
+        if(!studentId || !studentName || !department) {
+            alert("الرجاء إكمال كافة البيانات الأساسية.");
+            return;
+        }
+
+        const checkboxes = document.querySelectorAll("#coursesList input[type='checkbox']:checked");
+        if(checkboxes.length === 0) {
+            alert("الرجاء اختيار مقرر واحد على الأقل.");
+            return;
+        }
+
+        const selectedCourses = [];
+        let totalUnits = 0;
+
+        checkboxes.forEach(cb => {
+            const type = cb.getAttribute("data-type");
+            const idx = cb.value;
+
+            if (type === "dept") {
+                const course = departmentCourses[department][idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "dept",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            } else if (type === "common") {
+                const course = commonCourses[idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "common",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            } else if (type === "shared") {
+                const course = sharedCourses[idx];
+                selectedCourses.push({
+                    code: course.code,
+                    name: course.name,
+                    units: course.units,
+                    group: course.group,
+                    type: "shared",
+                    indexInArray: idx
+                });
+                totalUnits += course.units;
+            }
+        });
+
+        const oldCourses = registeredStudents[existingStudentIndex].courses;
+        oldCourses.forEach(oc => {
+            if (oc.type === "dept") {
+                if(departmentCourses[registeredStudents[existingStudentIndex].department] && departmentCourses[registeredStudents[existingStudentIndex].department][oc.indexInArray]) {
+                    departmentCourses[registeredStudents[existingStudentIndex].department][oc.indexInArray].enrolled--;
+                }
+            } else if (oc.type === "common") {
+                if(commonCourses[oc.indexInArray]) {
+                    commonCourses[oc.indexInArray].enrolled--;
+                }
+            } else if (oc.type === "shared") {
+                if(sharedCourses[oc.indexInArray]) {
+                    sharedCourses[oc.indexInArray].enrolled--;
+                }
+            }
+        });
+
+        for(let sc of selectedCourses) {
+            if (sc.type === "dept") {
+                const courseObj = departmentCourses[department][sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التعديل!`);
+                    return;
+                }
+            } else if (sc.type === "common") {
+                const courseObj = commonCourses[sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر العام ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التعديل!`);
+                    return;
+                }
+            } else if (sc.type === "shared") {
+                const courseObj = sharedCourses[sc.indexInArray];
+                if(courseObj.enrolled >= courseObj.max) {
+                    alert(`عذراً، المقرر المشترك ${courseObj.name} (${courseObj.group}) قد اكتملت سعته أثناء التعديل!`);
+                    return;
+                }
+            }
+        }
+
+        selectedCourses.forEach(sc => {
+            if (sc.type === "dept") {
+                departmentCourses[department][sc.indexInArray].enrolled++;
+            } else if (sc.type === "common") {
+                commonCourses[sc.indexInArray].enrolled++;
+            } else if (sc.type === "shared") {
+                sharedCourses[sc.indexInArray].enrolled++;
+            }
+        });
+
+        let detailsText = selectedCourses.map(c => `${c.name} (${c.code}) - ${c.group} - ${c.units} وحدات`).join(" | ");
+        detailsText += ` [إجمالي الوحدات: ${totalUnits}] (تعديل)`;
+        document.getElementById("netifyCoursesDetails").value = detailsText;
+
+        const currentEdits = (registeredStudents[existingStudentIndex].editCount || 0) + 1;
+        const studentData = {
+            studentId,
+            studentName,
+            department,
+            courses: selectedCourses,
+            totalUnits,
+            regDate: registeredStudents[existingStudentIndex].regDate,
+            editCount: currentEdits
+        };
+
+        registeredStudents[existingStudentIndex] = studentData;
+        saveDataToStorage();
+
+        // إرسال التحديث لقوقل شيت أيضاً
+        sendDataToGoogleSheet(studentData);
+
+        const myForm = document.getElementById('registrationForm');
+        const formData = new FormData(myForm);
+        fetch("/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(formData).toString()
+        }).catch((error) => console.log("Netlify Form Submission Info:", error));
+
+        displayStudentSchedule(studentData);
+    }
+
+    function saveDataToStorage() {
+        localStorage.setItem("registeredStudents", JSON.stringify(registeredStudents));
+        localStorage.setItem("departmentCourses", JSON.stringify(departmentCourses));
+        localStorage.setItem("commonCourses", JSON.stringify(commonCourses));
+        localStorage.setItem("sharedCourses", JSON.stringify(sharedCourses));
+    }
+
+    function displayStudentSchedule(student) {
+        document.getElementById("studentView").classList.remove("active");
+        document.getElementById("schedulePageView").classList.add("active");
+
+        const detailsEl = document.getElementById("studentDetails");
+        detailsEl.innerHTML = `
+            <strong>رقم القيد:</strong> ${student.studentId} <br>
+            <strong>اسم الطالب:</strong> ${student.studentName} <br>
+            <strong>القسم:</strong> ${student.department} <br>
+            <strong>تاريخ التسجيل:</strong> ${student.regDate || 'غير متوفر'} <br>
+            <strong>عدد محاولات التعديل:</strong> ${student.editCount || 0} من 1
+        `;
+
+        const tbody = document.getElementById("scheduleTableBody");
+        tbody.innerHTML = "";
+
+        student.courses.forEach(c => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="unicode-bidi: isolate; direction: rtl; text-align: right; padding-right: 15px;"><span style="display: inline-block; unicode-bidi: isolate;">${c.name}</span></td>
+                <td style="direction: ltr; unicode-bidi: embed;">${c.code}</td>
+                <td>${c.group}</td>
+                <td>${c.units}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById("totalUnits").innerText = `إجمالي الوحدات الدراسية المسجلة: ${student.totalUnits}`;
+        currentEditingStudentId = student.studentId;
+
+        const editBtn = document.getElementById("editScheduleBtn");
+        if(student.editCount >= 1) {
+            editBtn.style.display = "none";
+        } else {
+            editBtn.style.display = "block";
+        }
+    }
+
+    document.getElementById("downloadJpgBtn").addEventListener("click", function() {
+        const element = document.getElementById("jpg-content");
+        html2canvas(element, { 
+            scale: 2, 
+            useCORS: true, 
+            allowTaint: true 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `جدول_المقررات_${currentEditingStudentId || 'student'}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+        }).catch(error => {
+            console.error("خطأ في حفظ الصورة:", error);
+            alert("فشل حفظ الصورة.");
+        });
+    });
+
+    function goToEditViewFromSchedule() {
+        const student = registeredStudents.find(s => s.studentId === currentEditingStudentId);
+        if(!student) return;
+
+        if(student.editCount >= 1) {
+            alert("⚠️ لا يُسمح لك بالتعديل أكثر من مرة واحدة.");
+            return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        if(regPeriod.startDate && regPeriod.endDate) {
+            if(today < regPeriod.startDate || today > regPeriod.endDate) {
+                alert("⚠️ عذراً، المنظومة مقفلة انتهت فترة تنزيل المقررات.");
+                return;
+            }
+        }
+
+        document.getElementById("schedulePageView").classList.remove("active");
+        document.getElementById("studentView").classList.add("active");
+
+        document.getElementById("studentId").value = student.studentId;
+        document.getElementById("studentName").value = student.studentName;
+        document.getElementById("department").value = student.department;
+
+        document.getElementById("studentId").disabled = true;
+
+        document.getElementById("submitRegBtn").style.display = "none";
+        document.getElementById("submitEditBtn").style.display = "inline-block";
+        document.getElementById("studentEditNotice").style.display = "block";
+        document.getElementById("studentDuplicateNotice").style.display = "none";
+
+        const datesInfoEl = document.getElementById("studentDatesInfo");
+        datesInfoEl.style.display = "block";
+        document.getElementById("displayRegDate").innerHTML = `<strong>تاريخ التسجيل:</strong> ${student.regDate || 'غير متوفر'}`;
+        document.getElementById("displayEditCount").innerHTML = `<strong>عدد محاولات التعديل:</strong> ${student.editCount || 0} من 1`;
+
+        const event = new Event('change');
+        document.getElementById("department").dispatchEvent(event);
+
+        setTimeout(() => {
+            student.courses.forEach(sc => {
+                let cb = null;
+                if (sc.type === "dept") {
+                    cb = document.getElementById(`dept_course_${sc.indexInArray}`);
+                } else if (sc.type === "common") {
+                    cb = document.getElementById(`common_course_${sc.indexInArray}`);
+                } else if (sc.type === "shared") {
+                    cb = document.getElementById(`shared_course_${sc.indexInArray}`);
+                }
+                if(cb && !cb.disabled) {
+                    cb.checked = true;
+                }
+            });
+        }, 100);
+    }
+
+    function exitSystem() {
+        document.getElementById("schedulePageView").classList.remove("active");
+        document.getElementById("studentView").classList.add("active");
+        document.getElementById("registrationForm").reset();
+        document.getElementById("studentId").disabled = false;
+        document.getElementById("studentEditNotice").style.display = "none";
+        document.getElementById("studentDuplicateNotice").style.display = "none";
+        document.getElementById("studentDatesInfo").style.display = "none";
+        document.getElementById("studentName").disabled = false;
+        document.getElementById("department").disabled = false;
+        document.getElementById("submitRegBtn").style.display = "inline-block";
+        document.getElementById("submitEditBtn").style.display = "none";
+        document.getElementById("coursesList").innerHTML = '<p style="color: #555; text-align: center;">الرجاء اختيار القسم أولاً لعرض المقررات</p>';
+        checkSystemAvailability();
+    }
+
+    function loadAdminCoursesForDept() {
+        const dept = document.getElementById("adminSelectDept").value;
+        const container = document.getElementById("adminCoursesListContainer");
+        container.innerHTML = "";
+
+        if(!dept || !departmentCourses[dept]) {
+            container.innerHTML = '<p style="color: #777; text-align: center; margin: 15px 0;">الرجاء اختيار القسم أعلاه لعرض المقررات وإدارتها</p>';
+            return;
+        }
+
+        let allCoursesForAdmin = [
+            ...departmentCourses[dept].map((c, idx) => ({ ...c, originalIndex: idx, type: 'dept', categoryName: 'تخصص' })),
+            ...commonCourses.map((c, idx) => ({ ...c, originalIndex: idx, type: 'common', categoryName: 'عامة' })),
+            ...sharedCourses.map((c, idx) => ({ ...c, originalIndex: idx, type: 'shared', categoryName: 'مشتركة' }))
+        ];
+
+        allCoursesForAdmin.forEach((course) => {
+            const isFull = course.enrolled >= course.max;
+            const rowDiv = document.createElement("div");
+            rowDiv.className = `admin-course-row ${isFull ? 'is-full' : ''}`;
+            rowDiv.innerHTML = `
+                <div style="unicode-bidi: isolate; direction: rtl;">
+                    <strong>[${course.categoryName}] ${course.name}</strong> <span style="direction: ltr; display: inline-block;">(${course.code})</span> - ${course.units} وحدات | [${course.group}] 
+                    <span style="color: ${isFull ? '#dc3545' : '#0056b3'}; font-weight: bold;">(المقاعد: ${course.enrolled}/${course.max})</span>
+                    ${isFull ? '<span class="full-badge">مكتمل</span>' : ''}
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="admin-action-btn" style="background-color: #2980b9; padding: 5px 10px; font-size: 11px;" onclick="openCapacityModal('${course.type}', '${dept}', ${course.originalIndex})">تعديل السعة</button>
+                    <button class="admin-action-btn" style="background-color: #27ae60; padding: 5px 10px; font-size: 11px;" onclick="openNewGroupModal('${course.type}', '${dept}', ${course.originalIndex})">+ مجموعة جديدة</button>
+                    <button class="admin-action-btn" style="background-color: #e67e22; padding: 5px 10px; font-size: 11px;" onclick="openEditCourseModal('${course.type}', '${dept}', ${course.originalIndex})">تعديل المقرر</button>
+                    <button class="admin-action-btn" style="background-color: #dc3545; padding: 5px 10px; font-size: 11px;" onclick="deleteCourse('${course.type}', '${dept}', ${course.originalIndex})">حذف</button>
+                </div>
+            `;
+            container.appendChild(rowDiv);
+        });
+    }
+
+    let activeModalType = null;
+    let activeModalDept = null;
+    let activeModalCourseIndex = null;
+
+    function openCapacityModal(type, dept, index) {
+        activeModalType = type;
+        activeModalDept = dept;
+        activeModalCourseIndex = index;
+        let course = (type === 'dept') ? departmentCourses[dept][index] : (type === 'common' ? commonCourses[index] : sharedCourses[index]);
+        document.getElementById("selectedCourseCapacityInfo").innerText = `المقرر: ${course.name} (${course.code}) - [${course.group}] | السعة الحالية: ${course.max}`;
+        document.getElementById("editCapacityInput").value = course.max;
+        document.getElementById("capacityModal").style.display = "flex";
+    }
+
+    function closeCapacityModal() {
+        document.getElementById("capacityModal").style.display = "none";
+    }
+
+    function confirmUpdateCapacity() {
+        const newMax = parseInt(document.getElementById("editCapacityInput").value);
+        if(!newMax || newMax < 1) {
+            alert("الرجاء إدخال سعة صحيحة.");
+            return;
+        }
+        if(activeModalType === 'dept') {
+            departmentCourses[activeModalDept][activeModalCourseIndex].max = newMax;
+        } else if(activeModalType === 'common') {
+            commonCourses[activeModalCourseIndex].max = newMax;
+        } else if(activeModalType === 'shared') {
+            sharedCourses[activeModalCourseIndex].max = newMax;
+        }
+        saveDataToStorage();
+        closeCapacityModal();
+        loadAdminCoursesForDept();
+        alert("تم تحديث السعة القصوى للمجموعة بنجاح.");
+    }
+
+    function openNewGroupModal(type, dept, index) {
+        activeModalType = type;
+        activeModalDept = dept;
+        activeModalCourseIndex = index;
+        let course = (type === 'dept') ? departmentCourses[dept][index] : (type === 'common' ? commonCourses[index] : sharedCourses[index]);
+        document.getElementById("selectedCourseInfoModal").innerText = `سيتم فتح مجموعة جديدة للمقرر: ${course.name} (${course.code})`;
+        document.getElementById("newGroupCapacity").value = 20;
+        document.getElementById("newGroupModal").style.display = "flex";
+    }
+
+    function closeNewGroupModal() {
+        document.getElementById("newGroupModal").style.display = "none";
+    }
+
+    function confirmOpenNewGroup() {
+        const capacity = parseInt(document.getElementById("newGroupCapacity").value);
+        if(!capacity || capacity < 1) {
+            alert("الرجاء إدخال سعة صحيحة.");
+            return;
+        }
+
+        let originalCourse = (activeModalType === 'dept') ? departmentCourses[activeModalDept][activeModalCourseIndex] : (activeModalType === 'common' ? commonCourses[activeModalCourseIndex] : sharedCourses[activeModalCourseIndex]);
+        let targetArray = (activeModalType === 'dept') ? departmentCourses[activeModalDept] : (activeModalType === 'common' ? commonCourses : sharedCourses);
+        const existingGroupsCount = targetArray.filter(c => c.code === originalCourse.code).length;
+        const groupNames = ["المجموعة الأولى", "المجموعة الثانية", "المجموعة الثالثة", "المجموعة الرابعة", "المجموعة الخامسة"];
+        const newGroupName = groupNames[existingGroupsCount] || `المجموعة ${existingGroupsCount + 1}`;
+
+        const newGroupCourse = {
+            code: originalCourse.code,
+            name: originalCourse.name,
+            units: originalCourse.units,
+            group: newGroupName,
+            max: capacity,
+            enrolled: 0
+        };
+
+        targetArray.push(newGroupCourse);
+        saveDataToStorage();
+
+        closeNewGroupModal();
+        loadAdminCoursesForDept();
+        alert(`تم فتح ${newGroupName} للمقرر ${originalCourse.name} بنجاح.`);
+    }
+
+    function openAddCourseModal() {
+        document.getElementById("addCourseModal").style.display = "flex";
+    }
+
+    function closeAddCourseModal() {
+        document.getElementById("addCourseModal").style.display = "none";
+    }
+
+    function confirmAddCourse() {
+        const dept = document.getElementById("newCourseDept").value;
+        const type = document.getElementById("newCourseType").value;
+        const name = document.getElementById("newCourseName").value.trim();
+        const code = document.getElementById("newCourseCode").value.trim().toUpperCase();
+        const units = parseInt(document.getElementById("newCourseUnits").value);
+        const max = parseInt(document.getElementById("newCourseMax").value);
+
+        if(!name || !code || !units || !max) {
+            alert("الرجاء تعبئة كافة حقول المقرر بدقة.");
+            return;
+        }
+
+        const newCourse = {
+            code,
+            name,
+            units,
+            group: "المجموعة الأولى",
+            max,
+            enrolled: 0
+        };
+
+        if(type === 'dept') {
+            if(!departmentCourses[dept]) departmentCourses[dept] = [];
+            departmentCourses[dept].push(newCourse);
+        } else if(type === 'common') {
+            commonCourses.push(newCourse);
+        } else if(type === 'shared') {
+            sharedCourses.push(newCourse);
+        }
+
+        saveDataToStorage();
+        closeAddCourseModal();
+        document.getElementById("newCourseName").value = "";
+        document.getElementById("newCourseCode").value = "";
+
+        if(document.getElementById("adminSelectDept").value === dept) {
+            loadAdminCoursesForDept();
+        }
+        alert("تم إضافة المقرر الجديد بنجاح.");
+    }
+
+    function openEditCourseModal(type, dept, index) {
+        activeModalType = type;
+        activeModalDept = dept;
+        activeModalCourseIndex = index;
+        let course = (type === 'dept') ? departmentCourses[dept][index] : (type === 'common' ? commonCourses[index] : sharedCourses[index]);
+        document.getElementById("editCourseName").value = course.name;
+        document.getElementById("editCourseCode").value = course.code;
+        document.getElementById("editCourseUnits").value = course.units;
+        document.getElementById("editCourseModal").style.display = "flex";
+    }
+
+    function closeEditCourseModal() {
+        document.getElementById("editCourseModal").style.display = "none";
+    }
+
+    function confirmEditCourse() {
+        const name = document.getElementById("editCourseName").value.trim();
+        const code = document.getElementById("editCourseCode").value.trim().toUpperCase();
+        const units = parseInt(document.getElementById("editCourseUnits").value);
+
+        if(!name || !code || !units) {
+            alert("الرجاء إدخال بيانات صحيحة.");
+            return;
+        }
+
+        if(activeModalType === 'dept') {
+            departmentCourses[activeModalDept][activeModalCourseIndex].name = name;
+            departmentCourses[activeModalDept][activeModalCourseIndex].code = code;
+            departmentCourses[activeModalDept][activeModalCourseIndex].units = units;
+        } else if(activeModalType === 'common') {
+            commonCourses[activeModalCourseIndex].name = name;
+            commonCourses[activeModalCourseIndex].code = code;
+            commonCourses[activeModalCourseIndex].units = units;
+        } else if(activeModalType === 'shared') {
+            sharedCourses[activeModalCourseIndex].name = name;
+            sharedCourses[activeModalCourseIndex].code = code;
+            sharedCourses[activeModalCourseIndex].units = units;
+        }
+
+        saveDataToStorage();
+        closeEditCourseModal();
+        loadAdminCoursesForDept();
+        alert("تم تعديل بيانات المقرر بنجاح.");
+    }
+
+    function deleteCourse(type, dept, index) {
+        if(confirm("هل أنت متأكد من حذف هذا المقرر؟")) {
+            if(type === 'dept') {
+                departmentCourses[dept].splice(index, 1);
+            } else if(type === 'common') {
+                commonCourses.splice(index, 1);
+            } else if(type === 'shared') {
+                sharedCourses.splice(index, 1);
+            }
+            saveDataToStorage();
+            loadAdminCoursesForDept();
+            alert("تم حذف المقرر بنجاح.");
+        }
+    }
+
+    function renderAdminStudentsTable(filterDept = "") {
+        const tbody = document.getElementById("adminTableBody");
+        tbody.innerHTML = "";
+
+        let filtered = registeredStudents;
+        if(filterDept) {
+            filtered = registeredStudents.filter(s => s.department === filterDept);
+        }
+
+        if(filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="color: #777;">لا يوجد طلاب مسجلين حتى الآن</td></tr>';
+            return;
+        }
+
+        filtered.forEach(s => {
+            s.courses.forEach((c, idx) => {
+                const tr = document.createElement("tr");
+                if(idx === 0) {
+                    tr.innerHTML = `
+                        <td rowspan="${s.courses.length}">${s.studentId}</td>
+                        <td rowspan="${s.courses.length}">${s.studentName}</td>
+                        <td rowspan="${s.courses.length}">${s.department}</td>
+                        <td style="unicode-bidi: isolate; direction: rtl; text-align: right;"><span style="display: inline-block; unicode-bidi: isolate;">${c.name}</span></td>
+                        <td>${c.code}</td>
+                        <td>${c.group}</td>
+                        <td>${c.units}</td>
+                        <td rowspan="${s.courses.length}" style="font-weight: bold; color: #003366;">${s.totalUnits}</td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td style="unicode-bidi: isolate; direction: rtl; text-align: right;"><span style="display: inline-block; unicode-bidi: isolate;">${c.name}</span></td>
+                        <td>${c.code}</td>
+                        <td>${c.group}</td>
+                        <td>${c.units}</td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function filterStudents() {
+        const dept = document.getElementById("filterDept").value;
+        renderAdminStudentsTable(dept);
+    }
+
+    function clearAllData() {
+        if(confirm("تحذير: هل أنت متأكد من مسح كافة بيانات الطلبة المسجلين؟ لا يمكن التراجع عن هذا الإجراء.")) {
+            registeredStudents = [];
+            for(let dept in departmentCourses) {
+                departmentCourses[dept].forEach(c => c.enrolled = 0);
+            }
+            commonCourses.forEach(c => c.enrolled = 0);
+            sharedCourses.forEach(c => c.enrolled = 0);
+            saveDataToStorage();
+            renderAdminStudentsTable();
+            alert("تم مسح بيانات الطلبة بنجاح.");
+        }
+    }
+
+    function downloadAdminWord() {
+        const tableHTML = document.getElementById("adminTableContainer").innerHTML;
+        const html = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='utf-8'>
+                <title>كشوفات الطلبة</title>
+                <style>
+                    body { direction: rtl; font-family: 'Segoe UI', Tahoma, sans-serif; color: #333; }
+                    h2, h3 { text-align: center; color: #004080; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #0056b3; padding: 10px; text-align: center; font-size: 13px; }
+                    th { background-color: #0056b3; color: white; }
+                </style>
+            </head>
+            <body>
+                <h2>جامعة مصراتة - كلية الفنون والإعلام</h2>
+                <h3>كشوفات تسجيل المقررات للطلاب</h3>
+                ${tableHTML}
+            </body>
+            </html>
+        `;
+        const blob = new Blob(['﻿' + html], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'كشوفات_الطلاب_المسجلين.doc';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    window.onload = function() {
+        checkSystemAvailability();
+    };
+</script>
+
+</body>
+</html>
